@@ -1,19 +1,19 @@
 package api
 
 import (
-	"context"
-	"fmt"
-	"strings"
-	"encoding/json"
-	"net/http"
 	db "agnostic-web-api/db"
+	utils "agnostic-web-api/utils"
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func Router(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Println("method", r.Method)
+
 	switch r.Method {
 	case "GET":
 		handleGet(w, r)
@@ -29,33 +29,26 @@ func Router(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleGet(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("path is", r.URL.Path)
-	urlParts := strings.Split(r.URL.Path, "/")
-
-	collectionName := urlParts[1]
-
-	fmt.Println("c name", collectionName)
-
-	dbClient := db.DB
-	coll := dbClient.Collection(collectionName)
-	title := "Back to the Future"
-
-	var result bson.M
-	err := coll.FindOne(context.TODO(), bson.D{{}}).Decode(&result)
-	if err == mongo.ErrNoDocuments {
-		fmt.Printf("No document was found with the title %s\n", title)
-		return
+	collection := utils.GetCollectionName(r.URL.Path)
+	cursor, err := db.DB.Collection(collection).Find(context.TODO(), bson.M{})
+	utils.Check(err)
+	
+	var results []bson.M
+	
+	if err = cursor.All(context.TODO(), &results); err != nil {
+		utils.Check(err)
 	}
-	if err != nil {
-		panic(err)
-	}
-	jsonData, err := json.MarshalIndent(result, "", "    ")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("%s\n", jsonData)
 
-  w.Write(jsonData)
+	defer cursor.Close(context.TODO())
+	
+	if err := cursor.Err(); err != nil {
+		utils.Check(err)
+	}
+
+	out, err := json.Marshal(results)
+	utils.Check(err)
+	
+	w.Write(out)
 }
 
 func handlePost(w http.ResponseWriter, r *http.Request) {
