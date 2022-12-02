@@ -4,16 +4,9 @@ import (
 	"context"
 	"fmt"
 	"strings"
-
-	// "io"
-	// "bytes"
-	// "log"
 	"encoding/json"
 	"net/http"
-
-	// "strings"
 	db "agnostic-web-api/db"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -43,7 +36,7 @@ func handleGet(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("c name", collectionName)
 
-	dbClient := db.DB()
+	dbClient := db.DB
 	coll := dbClient.Collection(collectionName)
 	title := "Back to the Future"
 
@@ -71,7 +64,7 @@ func handlePost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	dbClient := db.DB()
+	dbClient := db.DB
 	result, err := dbClient.Collection("users").InsertOne(context.TODO(), payload)
 
 	if err != nil {

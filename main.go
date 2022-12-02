@@ -1,25 +1,22 @@
-
-
 package main
 
 import (
-    "log"
-    "fmt"
-    "os"
-    "net/http"
-		api "agnostic-web-api/api"
+	api "agnostic-web-api/api"
+	config "agnostic-web-api/config"
+	db "agnostic-web-api/db"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
 )
 
 func main() {
-    http.HandleFunc("/", api.Router)
+  config.LoadEnv(".env") // Loading env variables into process from .env file
+  db.Connect() // Connecting mongodb
 
-    PORT := os.Getenv("PORT")
+	http.HandleFunc("/", api.Router)
+	PORT := os.Getenv("PORT")
 
-		if PORT == "" {
-			PORT = "5000"
-		}
-
-    log.Println("Listening on port ", PORT)
-
-    log.Fatal(http.ListenAndServe(fmt.Sprint(":", PORT), nil))
+	log.Println("Listening on port ", PORT)
+	log.Fatal(http.ListenAndServe(fmt.Sprint(":", PORT), nil))
 }
