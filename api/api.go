@@ -15,16 +15,16 @@ func Router(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	switch r.Method {
-	case "GET":
-		handleGet(w, r)
-	case "PUT":
-		handlePut(w, r)
-	case "POST":
-		handlePost(w, r)
-	case "DELETE":
-		handleGet(w, r)
-	default:
-		fmt.Fprintf(w, "METHOD NOT SUPPORTED")
+		case "GET":
+			handleGet(w, r)
+		case "PUT":
+			handlePut(w, r)
+		case "POST":
+			handlePost(w, r)
+		case "DELETE":
+			handleGet(w, r)
+		default:
+			fmt.Fprintf(w, "METHOD NOT SUPPORTED")
 	}
 }
 
