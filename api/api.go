@@ -54,18 +54,17 @@ func handleGet(w http.ResponseWriter, r *http.Request) {
 func handlePost(w http.ResponseWriter, r *http.Request) {
 	var payload map[string]any
 	err := json.NewDecoder(r.Body).Decode(&payload)
-	if err != nil {
-		panic(err)
-	}
-	dbClient := db.DB
-	result, err := dbClient.Collection("users").InsertOne(context.TODO(), payload)
+	utils.Check(err)
 
-	if err != nil {
-		panic(err)
-	}
+	collection := utils.GetCollectionName(r.URL.Path)
+	result, err := db.DB.Collection(collection).InsertOne(context.TODO(), payload)
 
-	fmt.Println(result)
+	utils.Check(err)
 
+	out, err := json.Marshal(result)
+	utils.Check(err)
+
+  w.Write(out)
 }
 
 func handlePut(w http.ResponseWriter, r *http.Request) {
