@@ -23,7 +23,7 @@ func Router(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		handlePost(w, r)
 	case "DELETE":
-		handleGet(w, r)
+		handleDelete(w, r)
 	default:
 		fmt.Fprintf(w, "METHOD NOT SUPPORTED")
 	}
@@ -99,5 +99,14 @@ func handlePut(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleDelete(w http.ResponseWriter, r *http.Request) {
+	collection := utils.GetCollectionName(r.URL.Path)
+	id := utils.GetURLParam(r.URL.Path)
 
+	where := bson.M{"_id": id}
+	res, err := db.DB.Collection(collection).DeleteOne(context.TODO(), where)
+	utils.Check(err)
+
+	out, err := json.Marshal(res)
+	utils.Check(err)
+	w.Write(out)
 }
