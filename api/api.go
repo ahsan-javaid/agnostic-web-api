@@ -12,12 +12,34 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type Context struct {
+	collection   string
+	param        []string
+	w            http.ResponseWriter
+	r            *http.Request
+}
+
+func (c Context) send(data []byte) {
+	c.w.Header().Set("Content-Type", "application/json")
+	c.w.Write(data)
+}
+
+
 func Router(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	collection := utils.GetCollectionName(r.URL.Path)
+	params := utils.GetParams(r.URL.Path)
+
+	c := Context {
+		collection:   collection,
+		param:    params,
+		w: w,
+		r: r,
+  }
 
 	switch r.Method {
 	case "GET":
-		handleGet(w, r)
+		handleGet(c)
 	case "PUT":
 		handlePut(w, r)
 	case "POST":
@@ -29,9 +51,8 @@ func Router(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleGet(w http.ResponseWriter, r *http.Request) {
-	collection := utils.GetCollectionName(r.URL.Path)
-	cursor, err := db.DB.Collection(collection).Find(context.TODO(), bson.M{})
+func handleGet(c Context) {
+	cursor, err := db.DB.Collection(c.collection).Find(context.TODO(), bson.M{})
 	utils.Check(err)
 
 	var results []bson.M
@@ -49,7 +70,7 @@ func handleGet(w http.ResponseWriter, r *http.Request) {
 	out, err := json.Marshal(results)
 	utils.Check(err)
 
-	w.Write(out)
+	c.send(out)
 }
 
 func handlePost(w http.ResponseWriter, r *http.Request) {
