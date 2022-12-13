@@ -19,9 +19,17 @@ type Context struct {
 	r            *http.Request
 }
 
-func (c Context) send(data []byte) {
+func (c Context) sendHttp200(data interface{}) {
+	resp := make(map[string]interface{})
+
+	resp["data"] = data
+
+	out, err := json.Marshal(resp)
+	utils.Check(err)
+
+	c.w.WriteHeader(http.StatusOK)
 	c.w.Header().Set("Content-Type", "application/json")
-	c.w.Write(data)
+	c.w.Write(out)
 }
 
 
@@ -67,10 +75,7 @@ func handleGet(c Context) {
 		utils.Check(err)
 	}
 
-	out, err := json.Marshal(results)
-	utils.Check(err)
-
-	c.send(out)
+	c.sendHttp200(results)
 }
 
 func handlePost(w http.ResponseWriter, r *http.Request) {
