@@ -12,10 +12,6 @@ func GetCollectionName(url string) string {
 	return strings.Split(url, "/")[1]
 }
 
-func GetURLParam(url string) string {
-	return strings.Split(url, "/")[2]
-}
-
 func GetParams(url string) []string {
 	return strings.Split(url, "/")
 }

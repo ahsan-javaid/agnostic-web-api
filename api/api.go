@@ -96,7 +96,7 @@ func handlePut(ctx Context) {
 	utils.Check(err)
 
 	collection := utils.GetCollectionName(ctx.r.URL.Path)
-	id := utils.GetURLParam(ctx.r.URL.Path)
+	id := ctx.param[2]
 
 	filter := bson.M{"_id": id}
 	update := bson.M{
@@ -121,7 +121,7 @@ func handlePut(ctx Context) {
 
 func handleDelete(ctx Context) {
 	collection := utils.GetCollectionName(ctx.r.URL.Path)
-	id := utils.GetURLParam(ctx.r.URL.Path)
+	id := ctx.param[2]
 
 	where := bson.M{"_id": id}
 	res, err := db.DB.Collection(collection).DeleteOne(context.TODO(), where)
