@@ -20,6 +20,7 @@ type Context struct {
 }
 
 func (c Context) sendHttp200(data interface{}) {
+	c.w.Header().Set("Content-Type", "application/json")
 	resp := make(map[string]interface{})
 
 	resp["data"] = data
@@ -28,17 +29,15 @@ func (c Context) sendHttp200(data interface{}) {
 	utils.Check(err)
 
 	c.w.WriteHeader(http.StatusOK)
-	c.w.Header().Set("Content-Type", "application/json")
 	c.w.Write(out)
 }
 
 
 func Router(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	collection := utils.GetCollectionName(r.URL.Path)
 	params := utils.GetParams(r.URL.Path)
 
-	c := Context {
+	ctx := Context {
 		collection:   collection,
 		param:    params,
 		w: w,
@@ -47,20 +46,20 @@ func Router(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "GET":
-		handleGet(c)
+		handleGet(ctx)
 	case "PUT":
-		handlePut(w, r)
+		handlePut(ctx)
 	case "POST":
-		handlePost(w, r)
+		handlePost(ctx)
 	case "DELETE":
-		handleDelete(w, r)
+		handleDelete(ctx)
 	default:
 		fmt.Fprintf(w, "METHOD NOT SUPPORTED")
 	}
 }
 
-func handleGet(c Context) {
-	cursor, err := db.DB.Collection(c.collection).Find(context.TODO(), bson.M{})
+func handleGet(ctx Context) {
+	cursor, err := db.DB.Collection(ctx.collection).Find(context.TODO(), bson.M{})
 	utils.Check(err)
 
 	var results []bson.M
@@ -75,32 +74,29 @@ func handleGet(c Context) {
 		utils.Check(err)
 	}
 
-	c.sendHttp200(results)
+	ctx.sendHttp200(results)
 }
 
-func handlePost(w http.ResponseWriter, r *http.Request) {
+func handlePost(ctx Context) {
 	var payload map[string]any
-	err := json.NewDecoder(r.Body).Decode(&payload)
+	err := json.NewDecoder(ctx.r.Body).Decode(&payload)
 	utils.Check(err)
 
-	collection := utils.GetCollectionName(r.URL.Path)
+	collection := utils.GetCollectionName(ctx.r.URL.Path)
 	result, err := db.DB.Collection(collection).InsertOne(context.TODO(), payload)
 
 	utils.Check(err)
 
-	out, err := json.Marshal(result)
-	utils.Check(err)
-
-	w.Write(out)
+	ctx.sendHttp200(result)
 }
 
-func handlePut(w http.ResponseWriter, r *http.Request) {
+func handlePut(ctx Context) {
 	var payload map[string]any
-	err := json.NewDecoder(r.Body).Decode(&payload)
+	err := json.NewDecoder(ctx.r.Body).Decode(&payload)
 	utils.Check(err)
 
-	collection := utils.GetCollectionName(r.URL.Path)
-	id := utils.GetURLParam(r.URL.Path)
+	collection := utils.GetCollectionName(ctx.r.URL.Path)
+	id := utils.GetURLParam(ctx.r.URL.Path)
 
 	filter := bson.M{"_id": id}
 	update := bson.M{
@@ -119,20 +115,17 @@ func handlePut(w http.ResponseWriter, r *http.Request) {
 	doc := bson.M{}
 	decodeErr := result.Decode(&doc)
 	utils.Check(decodeErr)
-	out, err := json.Marshal(doc)
-	utils.Check(err)
-	w.Write(out)
+
+	ctx.sendHttp200(doc)
 }
 
-func handleDelete(w http.ResponseWriter, r *http.Request) {
-	collection := utils.GetCollectionName(r.URL.Path)
-	id := utils.GetURLParam(r.URL.Path)
+func handleDelete(ctx Context) {
+	collection := utils.GetCollectionName(ctx.r.URL.Path)
+	id := utils.GetURLParam(ctx.r.URL.Path)
 
 	where := bson.M{"_id": id}
 	res, err := db.DB.Collection(collection).DeleteOne(context.TODO(), where)
 	utils.Check(err)
 
-	out, err := json.Marshal(res)
-	utils.Check(err)
-	w.Write(out)
+	ctx.sendHttp200(res)
 }
