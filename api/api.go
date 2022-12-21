@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -59,7 +60,18 @@ func Router(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleGet(ctx Context) {
-	cursor, err := db.DB.Collection(ctx.collection).Find(context.TODO(), bson.M{})
+	filter := bson.M{}
+	if len(ctx.param) == 3 {
+		record := bson.M{}
+		filter = bson.M{"_id": ctx.param[2]}
+		id, _ := primitive.ObjectIDFromHex(ctx.param[2])
+		err := db.DB.Collection(ctx.collection).FindOne(context.TODO(),bson.M{"_id": id}).Decode(&record)
+		utils.Check(err)
+		ctx.sendHttp200(record)
+		return
+	}
+
+	cursor, err := db.DB.Collection(ctx.collection).Find(context.TODO(), filter)
 	utils.Check(err)
 
 	var results []bson.M
