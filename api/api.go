@@ -14,10 +14,10 @@ import (
 )
 
 type Context struct {
-	collection   string
-	param        []string
-	w            http.ResponseWriter
-	r            *http.Request
+	collection string
+	param      []string
+	w          http.ResponseWriter
+	r          *http.Request
 }
 
 func (c Context) sendHttp200(data interface{}) {
@@ -33,21 +33,25 @@ func (c Context) sendHttp200(data interface{}) {
 	c.w.Write(out)
 }
 
-
 func Router(w http.ResponseWriter, r *http.Request) {
 	collection := utils.GetCollectionName(r.URL.Path)
 	params := utils.GetParams(r.URL.Path)
 
-	ctx := Context {
-		collection:   collection,
-		param:    params,
-		w: w,
-		r: r,
-  }
+	ctx := Context{
+		collection: collection,
+		param:      params,
+		w:          w,
+		r:          r,
+	}
 
 	switch r.Method {
 	case "GET":
-		handleGet(ctx)
+		switch len(ctx.param) {
+		case 3:
+			handleGetById(ctx)
+		default:
+			handleGet(ctx)
+		}
 	case "PUT":
 		handlePut(ctx)
 	case "POST":
@@ -59,18 +63,18 @@ func Router(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func handleGetById(ctx Context) {
+	record := bson.M{}
+	id, _ := primitive.ObjectIDFromHex(ctx.param[2])
+	
+	err := db.DB.Collection(ctx.collection).FindOne(context.TODO(), bson.M{"_id": id}).Decode(&record)
+	utils.Check(err)
+
+	ctx.sendHttp200(record)
+}
+
 func handleGet(ctx Context) {
 	filter := bson.M{}
-	if len(ctx.param) == 3 {
-		record := bson.M{}
-		filter = bson.M{"_id": ctx.param[2]}
-		id, _ := primitive.ObjectIDFromHex(ctx.param[2])
-		err := db.DB.Collection(ctx.collection).FindOne(context.TODO(),bson.M{"_id": id}).Decode(&record)
-		utils.Check(err)
-		ctx.sendHttp200(record)
-		return
-	}
-
 	cursor, err := db.DB.Collection(ctx.collection).Find(context.TODO(), filter)
 	utils.Check(err)
 
