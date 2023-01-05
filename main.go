@@ -2,6 +2,7 @@ package main
 
 import (
 	api "agnostic-web-api/api"
+	// middleware "agnostic-web-api/middleware"
 	config "agnostic-web-api/config"
 	db "agnostic-web-api/db"
 	"fmt"
