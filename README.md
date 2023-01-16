@@ -30,3 +30,18 @@ Mongodb running at localhost:27017
 
 ## Authentication 
 Coming soon...
+
+### Architecture
+Here is a light architecture diagram describing the relationship between packages in agnostic-web-api:
+
+```
+    +--main--+       +---api--+   +------db-----+   
+    |        |-url-> +  GET   |-->|   Perform   |   
+    |  http  |       +  PUT   |   |  operation  |    
+    | server |       |  POST  |   |  based on   | 
+    |        |       | DELETE |   |entity in url|
+    +---+----+       +--------+   +-------------+
+     |              http listner              |
+     |  Routing & db read/write based on url  |
+     +----------------------------------------+
+```
