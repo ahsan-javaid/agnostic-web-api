@@ -44,6 +44,11 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		r:          r,
 	}
 
+	if ctx.collection == "" {
+		ctx.sendHttp200("ok")
+		return
+	}
+
 	switch r.Method {
 	case "GET":
 		switch len(ctx.param) {
