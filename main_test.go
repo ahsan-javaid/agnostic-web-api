@@ -1,10 +1,14 @@
 package main
 
 import (
+    "context"
     "net/http"
     "net/http/httptest"
     "testing"
     api "agnostic-web-api/api"
+    db "agnostic-web-api/db"
+    config "agnostic-web-api/config"
+    "go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 func TestAPI(t *testing.T) {
@@ -34,5 +38,17 @@ func TestAPI(t *testing.T) {
     if rr.Body.String() != expected {
         t.Errorf("API endpoint returned unexpected body: got %v want %v",
             rr.Body.String(), expected)
+    }
+}
+
+func TestDBConnection(t *testing.T) {
+    config.LoadEnv(".env")
+   
+    db.Connect()
+   
+    err := db.DB.Client().Ping(context.TODO(), readpref.Primary())
+
+    if err !=nil {
+        t.Errorf("Unable to connect to db %v", err)
     }
 }
