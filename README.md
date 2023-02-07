@@ -12,7 +12,7 @@ PUT /<entity name>/id
 POST /<entity name>
 DELETE /<entity name>/id
 ```
-Where entity name could be anything like users, books, .... so on (xyz)
+Where entity name could be anything like users, books, .... so on (unstructured json)
 
 ## Requirements
 - Golang
