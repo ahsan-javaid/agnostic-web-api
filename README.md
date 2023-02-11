@@ -6,11 +6,14 @@ Web rest api prototype as generic backend application
 This project is generic enough to handle (GET|PUT|POST|DELETE) routes on any entity specified in url. 
 
 ## Examples
+Base url: http://localhost:5000
 ```
-GET /<entity name>
-PUT /<entity name>/id
-POST /<entity name>
-DELETE /<entity name>/id
+GET    http://localhost:5000/{entity_name}
+PUT    http://localhost:5000/{entity_name}/id 
+       Body: { json data here } 
+POST   http://localhost:5000/{entity_name}
+       Body: { json data here } 
+DELETE http://localhost:5000/{entity_name}/id
 ```
 Where entity name could be anything like users, books, .... so on (unstructured json)
 
