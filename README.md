@@ -22,6 +22,13 @@ Where entity name could be anything like users, books, .... so on (unstructured 
 - MongoDB 
 
 ## Project Setup
+Enviroment variables loaded from .env file
+```
+PORT=5000
+DB_URI=mongodb://localhost:27017
+DB_NAME=agnostic-web-api
+```
+Run following command in the root of the project
 ```
 go mod download
 ```
