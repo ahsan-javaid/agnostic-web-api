@@ -41,7 +41,7 @@ Mongodb running at localhost:27017
 ## Authentication 
 Coming soon...
 
-### Architecture
+## Architecture
 Here is a light architecture diagram describing the relationship between packages in agnostic-web-api:
 
 ```
