@@ -33,6 +33,19 @@ func (c Context) sendHttp200(data interface{}) {
 	c.w.Write(out)
 }
 
+func (c Context) sendHttp400(msg string) {
+	c.w.Header().Set("Content-Type", "application/json")
+	resp := make(map[string]interface{})
+
+	resp["msg"] = msg
+
+	out, err := json.Marshal(resp)
+	utils.Check(err)
+
+	c.w.WriteHeader(http.StatusBadRequest)
+	c.w.Write(out)
+}
+
 func Router(w http.ResponseWriter, r *http.Request) {
 	collection := utils.GetCollectionName(r.URL.Path)
 	params := utils.GetParams(r.URL.Path)
@@ -46,6 +59,13 @@ func Router(w http.ResponseWriter, r *http.Request) {
 
 	if ctx.collection == "" {
 		ctx.sendHttp200("ok")
+		return
+	}
+
+  fmt.Println("path:", r.URL.Path)
+
+	if r.URL.Path == "/users/login" {
+		handleLogin(ctx)
 		return
 	}
 
@@ -149,4 +169,24 @@ func handleDelete(ctx Context) {
 	utils.Check(err)
 
 	ctx.sendHttp200(res)
+}
+
+func handleLogin(ctx Context) {
+	// Decode body 
+	var payload map[string]any
+	err := json.NewDecoder(ctx.r.Body).Decode(&payload)
+	utils.Check(err)
+
+	// Check if email and password
+
+	if payload["email"] == nil || payload["password"] == nil {
+		ctx.sendHttp400("Email and password required")
+		return
+	}
+	
+	record := bson.M{}
+	err = db.DB.Collection(ctx.collection).FindOne(context.TODO(), bson.M{"email": payload["email"]}).Decode(&record)
+	utils.Check(err)
+
+	ctx.sendHttp200(record)
 }
