@@ -178,15 +178,26 @@ func handleLogin(ctx Context) {
 	utils.Check(err)
 
 	// Check if email and password
+	email := payload["email"]
+	password := payload["password"]
 
-	if payload["email"] == nil || payload["password"] == nil {
+	if email == nil || password == nil {
 		ctx.sendHttp400("Email and password required")
 		return
 	}
 	
 	record := bson.M{}
-	err = db.DB.Collection(ctx.collection).FindOne(context.TODO(), bson.M{"email": payload["email"]}).Decode(&record)
+	err = db.DB.Collection(ctx.collection).FindOne(context.TODO(), bson.M{"email": email }).Decode(&record)
 	utils.Check(err)
 
-	ctx.sendHttp200(record)
+	var hash string = fmt.Sprint(record["password"])
+
+	match := utils.CheckPasswordHash(fmt.Sprint(password), hash)
+
+	if match {
+		ctx.sendHttp200(record)
+	} else {
+		ctx.sendHttp400("Invalid email or password")
+	}
+
 }

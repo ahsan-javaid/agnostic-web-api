@@ -1,6 +1,10 @@
 package utils
 
-import "strings"
+import (
+	"strings"
+
+	"golang.org/x/crypto/bcrypt"
+)
 
 func Check(e error) {
 	if e != nil {
@@ -14,4 +18,14 @@ func GetCollectionName(url string) string {
 
 func GetParams(url string) []string {
 	return strings.Split(url, "/")
+}
+
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }
