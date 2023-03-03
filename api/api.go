@@ -62,7 +62,7 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  fmt.Println("path:", r.URL.Path)
+	fmt.Println("path:", r.URL.Path)
 
 	if r.URL.Path == "/users/login" {
 		handleLogin(ctx)
@@ -91,7 +91,7 @@ func Router(w http.ResponseWriter, r *http.Request) {
 func handleGetById(ctx Context) {
 	record := bson.M{}
 	id, _ := primitive.ObjectIDFromHex(ctx.param[2])
-	
+
 	err := db.DB.Collection(ctx.collection).FindOne(context.TODO(), bson.M{"_id": id}).Decode(&record)
 	utils.Check(err)
 
@@ -172,7 +172,7 @@ func handleDelete(ctx Context) {
 }
 
 func handleLogin(ctx Context) {
-	// Decode body 
+	// Decode body
 	var payload map[string]any
 	err := json.NewDecoder(ctx.r.Body).Decode(&payload)
 	utils.Check(err)
@@ -185,9 +185,9 @@ func handleLogin(ctx Context) {
 		ctx.sendHttp400("Email and password required")
 		return
 	}
-	
+
 	record := bson.M{}
-	err = db.DB.Collection(ctx.collection).FindOne(context.TODO(), bson.M{"email": email }).Decode(&record)
+	err = db.DB.Collection(ctx.collection).FindOne(context.TODO(), bson.M{"email": email}).Decode(&record)
 	utils.Check(err)
 
 	var hash string = fmt.Sprint(record["password"])
@@ -199,5 +199,31 @@ func handleLogin(ctx Context) {
 	} else {
 		ctx.sendHttp400("Invalid email or password")
 	}
+}
 
+func handleSignup(ctx Context) {
+	// Decode body
+	var payload map[string]any
+	err := json.NewDecoder(ctx.r.Body).Decode(&payload)
+	utils.Check(err)
+
+	// Check if email and password
+	email := payload["email"]
+	password := payload["password"]
+
+	if email == nil || password == nil {
+		ctx.sendHttp400("Email and password required")
+		return
+	}
+
+	payload["password"], _ = utils.HashPassword(fmt.Sprint(password));
+
+	collection := utils.GetCollectionName(ctx.r.URL.Path)
+	result, err := db.DB.Collection(collection).InsertOne(context.TODO(), payload)
+
+	// Generate jwt token here
+	// Example: https://pkg.go.dev/github.com/golang-jwt/jwt/v5#example-New-Hmac
+
+	utils.Check(err)
+	ctx.sendHttp200(result)
 }
