@@ -69,6 +69,11 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.URL.Path == "/users/signup" {
+		handleSignup(ctx)
+		return
+	}
+
 	switch r.Method {
 	case "GET":
 		switch len(ctx.param) {
