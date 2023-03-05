@@ -3,6 +3,7 @@ package api
 import (
 	db "agnostic-web-api/db"
 	utils "agnostic-web-api/utils"
+	auth "agnostic-web-api/auth"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -199,8 +200,20 @@ func handleLogin(ctx Context) {
 
 	match := utils.CheckPasswordHash(fmt.Sprint(password), hash)
 
+
+	tokenString, err := auth.GenerateToken(fmt.Sprint(record["_id"]))
+	if err != nil {
+			http.Error(ctx.w, err.Error(), http.StatusInternalServerError)
+			return
+	}
+
+	resp := make(map[string]any)
+
+	resp["token"] = tokenString
+	resp["user"] = record
+
 	if match {
-		ctx.sendHttp200(record)
+		ctx.sendHttp200(resp)
 	} else {
 		ctx.sendHttp400("Invalid email or password")
 	}
