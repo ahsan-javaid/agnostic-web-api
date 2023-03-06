@@ -79,6 +79,7 @@ func parseToken(tokenString string) (*Claims, error) {
 	if err != nil {
 		return nil, err
 	}
+	
 	var tokenClaims Claims
 	if err := json.Unmarshal(claimsBytes, &tokenClaims); err != nil {
 		return nil, err
