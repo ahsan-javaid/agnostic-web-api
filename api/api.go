@@ -1,9 +1,9 @@
 package api
 
 import (
+	auth "agnostic-web-api/auth"
 	db "agnostic-web-api/db"
 	utils "agnostic-web-api/utils"
-	auth "agnostic-web-api/auth"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -200,11 +200,10 @@ func handleLogin(ctx Context) {
 
 	match := utils.CheckPasswordHash(fmt.Sprint(password), hash)
 
-
 	tokenString, err := auth.GenerateToken(fmt.Sprint(record["_id"]))
 	if err != nil {
-			http.Error(ctx.w, err.Error(), http.StatusInternalServerError)
-			return
+		http.Error(ctx.w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	resp := make(map[string]any)
@@ -234,14 +233,22 @@ func handleSignup(ctx Context) {
 		return
 	}
 
-	payload["password"], _ = utils.HashPassword(fmt.Sprint(password));
+	payload["password"], _ = utils.HashPassword(fmt.Sprint(password))
 
 	collection := utils.GetCollectionName(ctx.r.URL.Path)
 	result, err := db.DB.Collection(collection).InsertOne(context.TODO(), payload)
 
-	// Generate jwt token here
-	// Example: https://pkg.go.dev/github.com/golang-jwt/jwt/v5#example-New-Hmac
+	utils.Check(err)
+
+	insertedID := result.InsertedID
+
+	tokenString, err := auth.GenerateToken(fmt.Sprint(insertedID))
 
 	utils.Check(err)
-	ctx.sendHttp200(result)
+
+	resp := make(map[string]any)
+
+	resp["token"] = tokenString
+	// Todo: Return user instance as well
+	ctx.sendHttp200(resp)
 }
