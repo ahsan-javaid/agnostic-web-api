@@ -249,6 +249,7 @@ func handleSignup(ctx Context) {
 	resp := make(map[string]any)
 
 	resp["token"] = tokenString
-	// Todo: Return user instance as well
+	// Todo: 
+	        // Return user instance as well
 	ctx.sendHttp200(resp)
 }
