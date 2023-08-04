@@ -236,6 +236,18 @@ func handleSignup(ctx Context) {
 	payload["password"], _ = utils.HashPassword(fmt.Sprint(password))
 
 	collection := utils.GetCollectionName(ctx.r.URL.Path)
+
+	usr := bson.M{}
+
+	err = db.DB.Collection(collection).FindOne(context.TODO(), bson.M{"email": email}).Decode(&usr)
+	
+	utils.Check(err)
+
+	if usr != nil {
+		ctx.sendHttp400("User already exists")
+		return
+	}
+
 	result, err := db.DB.Collection(collection).InsertOne(context.TODO(), payload)
 
 	utils.Check(err)
@@ -246,10 +258,16 @@ func handleSignup(ctx Context) {
 
 	utils.Check(err)
 
+	record := bson.M{}
+
+	err = db.DB.Collection(collection).FindOne(context.TODO(), bson.M{"_id": insertedID}).Decode(&record)
+	
+	utils.Check(err)
+
 	resp := make(map[string]any)
 
 	resp["token"] = tokenString
-	// Todo: 
-	        // Return user instance as well
+	resp["user"] = record
+
 	ctx.sendHttp200(resp)
 }
