@@ -78,9 +78,9 @@ func Router(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		switch len(ctx.param) {
-		case 3:
+		case 3: // Get by id
 			handleGetById(ctx)
-		default:
+		default: // Get all records
 			handleGet(ctx)
 		}
 	case "PUT":
