@@ -18,6 +18,6 @@ func main() {
 	http.HandleFunc("/", api.Router)
 	PORT := os.Getenv("PORT")
 
-	log.Println("Listening on port ", PORT)
+	log.Println("Listening on port: ", PORT)
 	log.Fatal(http.ListenAndServe(fmt.Sprint(":", PORT), nil))
 }
