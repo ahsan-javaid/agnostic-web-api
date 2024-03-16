@@ -1,4 +1,4 @@
-## About
+## Agnostic Web API
 
 Web rest api prototype as generic backend application
 
