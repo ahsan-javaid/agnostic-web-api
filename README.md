@@ -55,3 +55,6 @@ Here is a light architecture diagram describing the relationship between package
      |  Routing & db read/write based on url  |
      +----------------------------------------+
 ```
+
+## Contribution
+Feel free to contribute and open pull request for feature additions.
