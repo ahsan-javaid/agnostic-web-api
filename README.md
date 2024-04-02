@@ -1,6 +1,6 @@
 ## Agnostic Web API
 
-Web rest api prototype as generic backend application
+Web rest api prototype as generic backend application using url based routing. 
 
 ## Documentation
 This project is generic enough to handle (GET|PUT|POST|DELETE) routes on any entity specified in url. 
